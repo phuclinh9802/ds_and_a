@@ -66,17 +66,29 @@ class Tree():
             else:
                 return False
 
-    # delete
+    # delete - need function to support
+    # getMinNode
+    def getMinNode(self, node):
+        while node.left:
+            node = node.left
+
+        return node
+
+    # delete implementation
     def delete(self, data): # more info, go to https://techiedelight.com/deletion-from-bst/
         # initialize parent to keep track of self's parent
         parent = None
         # start from root
         current = self
+        # root node
+        root = self
 
         # set the parent of the node to be deleted's pointer
         while current is not None and current.data != data:
             # set parent pointer
             parent = current
+            # root node
+            root = self
 
             # check the value of the data > or < current node's data
             if current.data < data:
@@ -87,3 +99,104 @@ class Tree():
         # if the data is not found
         if current is None:
             return False
+
+        # Case 1: Leaf Node
+        if current.left is None and current.right is None:
+            # if leaf node is not root node
+            if current != root:
+                # check if parent's left node = current node
+                if parent.left == current:
+                    parent.left = None
+                elif parent.right == current:
+                    parent.right = None
+
+            # if leaf node is root node
+                root = None
+
+        # Case 2: Node to be deleted has 2 children
+        if current.left and current.right:
+            # get the next min node to replace the current node
+            # need a supported function to get leftmost node of the right child
+            min_node = self.getMinNode(current.right)
+
+            # store the successor value
+            val = min_node.data
+
+            # recursively call
+            self.delete(min_node.data)
+
+            # copy val of successor to current node
+            current.data = val
+
+        # Note:
+        # example: delete(20)
+        # parent = 15, current=20 -> case 2
+        # min_node = 30
+        # val = 30
+        # recursive: delete(30)
+        # -> case 1: leaf node -> parent = 20, current = 30 -> parent.right = None -> return self
+        # -> current.data = 30 => We are done!
+        # 2nd choice, we can also get max of left child
+
+        # Case 3: Node to be deleted has 1 child
+        if current.left or current.right:
+            if current.left:
+                # store child node
+                child = current.left
+            elif current.right:
+                # store child node
+                child = current.right
+
+            # if not root
+            if current != root:
+                if parent.left == current:
+                    parent.left = child # skip deleted node
+                elif parent.right == current:
+                    parent.right = child # skip deleted node
+
+            # if root
+            if current == root:
+                root = child
+
+    # get_size
+    def get_size(self):
+        # recursion
+        if self.left and self.right:
+            return 1 + self.left.get_size() + self.right.get_size()
+        elif self.left:
+            return 1 + self.left.get_size()
+        elif self.right:
+            return 1 + self.right.get_size()
+
+    # preorder (NLR)
+    def preorder(self):
+        if self is not None:
+            print(self.data, end=" ")
+            if self.left:
+                self.left.preorder()
+            if self.right:
+                self.right.preorder()
+
+    # inorder
+    def inorder(self):
+        # check if current root is not none
+        if self is not None:
+            # go through the left first
+            if self.left:
+                self.left.inorder()
+            # get root in between
+            print(self.data, end=" ")
+            # go through right subtree
+            if self.right:
+                self.right.inorder()
+
+# test BST code
+bst = Tree(7)
+
+bst.insert(3)
+bst.insert(4)
+bst.insert(5)
+bst.insert(8)
+bst.insert(9)
+print(bst.find(3))
+bst.preorder()
